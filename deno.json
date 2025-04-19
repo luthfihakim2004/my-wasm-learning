@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "dev": "deno run --watch main.ts"
+    "build": "emcc c/main.c -o public/build/hello.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_greet -sEXPORTED_RUNTIME_METHODS=ccall,cwrap"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "/": "./",
+    "./": "./"
+  }
+}
