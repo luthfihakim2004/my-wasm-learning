@@ -1,0 +1,53 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main", "luthfihakim2004-sec-test" ]
+  pull_request:
+    branches: [ "main", "luthfihakim2004-sec-test" ]
+  schedule:
+    - cron: '34 14 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+
+    - name: Set up CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: cpp
+        build-mode: manual
+
+    - name: Install Emscripten SDK
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest
+        ./emsdk activate latest
+        
+    - name: Load EMSDK environment
+      run: |
+        source emsdk/emsdk_env.sh
+        echo "EMSDK=$EMSDK" >> $GITHUB_ENV
+        echo "EMSDK_NODE=$EMSDK_NODE" >> $GITHUB_ENV
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        
+    - name: Build with emcc
+      run: |
+        source emsdk/emsdk_env.sh
+        emcc c/main.c -o public/build/hello.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_is_elf,_get_entry_point,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,UTF8ToString,stringToUTF8,lengthBytesUTF8,allocateUTF8,HEAPU8 --memoryprofiler
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
