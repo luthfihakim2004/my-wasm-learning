@@ -36,9 +36,14 @@ jobs:
         cd emsdk
         ./emsdk install latest
         ./emsdk activate latest
-        source ./emsdk_env.sh
-        echo "source $PWD/emsdk_env.sh" >> $GITHUB_ENV
-
+        
+    - name: Load EMSDK environment
+      run: |
+        source emsdk/emsdk_env.sh
+        echo "EMSDK=$EMSDK" >> $GITHUB_ENV
+        echo "EMSDK_NODE=$EMSDK_NODE" >> $GITHUB_ENV
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        
     - name: Build with emcc
       run: |
         source emsdk/emsdk_env.sh
