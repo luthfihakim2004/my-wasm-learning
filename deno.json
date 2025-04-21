@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --watch main.ts"
-    "build": "emcc c/main.c -o public/build/hello.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_store_input,_get_input,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,UTF8ToString,stringToUTF8,lengthBytesUTF8,allocateUTF8"
+    "build": "emcc c/main.c -o public/build/hello.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_is_elf,_get_entry_point,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,UTF8ToString,stringToUTF8,lengthBytesUTF8,allocateUTF8,HEAPU8 --memoryprofiler"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",

@@ -3,34 +3,30 @@ import ModuleFactory from "/build/hello.js";
 const init = async () => {
   const Module = await ModuleFactory();
 
-  const store_input = Module.cwrap("store_input", null, ["number"]);
-  const get_input = Module.cwrap("get_input", "number", []);
+  const isElf = Module.cwrap('is_elf', 'number', ['number', 'number']);
+  const getEntry = Module.cwrap('get_entry_point', 'number', ['number', 'number']);
 
-  const nameInput = document.getElementById("name");
-  const greetBtn = document.getElementById("greetBtn");
+  const uploadBtn = document.getElementById("uploadBtn");
   const output = document.getElementById("output");
 
-  greetBtn.onclick = () => {
-    const inputText = nameInput.value;
+  uploadBtn.onclick = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
 
-    // Allocate memory
-    const len = Module.lengthBytesUTF8(inputText) + 1;
+    const buffer = await file.arrayBuffer();
+    const len = buffer.byteLength;
     const ptr = Module._malloc(len);
+    Module.HEAPU8.set(new Uint8Array(buffer), ptr);
 
-    // Copy string into WASM memory
-    Module.stringToUTF8(inputText, ptr, len);
+    const result = isElf(ptr, len);
+    output.textContent = result ? "Valid ELF file." : "Not an ELF file.";
 
-    // Call WASM function
-    store_input(ptr);
+    if (result) {
+      const entry = getEntry(ptr, len);
+      output.textContent += `\nEntry point: 0x${entry.toString(16)}`;
+    }
 
-    // Free memory
     Module._free(ptr);
-
-    // Get result from WASM
-    const resultPtr = get_input();
-    const resultStr = Module.UTF8ToString(resultPtr);
-
-    output.textContent = `Hello, ${resultStr}!`;
   };
 };
 
