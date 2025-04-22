@@ -1,11 +1,19 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch main.ts",
     "build": "emcc c/main.c -o public/build/main.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_is_elf,_get_entry_point,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,HEAPU8 --memoryprofiler"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "/": "./",
     "./": "./"
+  },
+  "deploy": {
+    "project": "48c179cb-c938-466e-abb9-bc7cf6f09ded",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "main.ts"
   }
 }
