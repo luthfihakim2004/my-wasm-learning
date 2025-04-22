@@ -1,0 +1,5 @@
+emsdk/
+.github/
+c/
+README.md
+*.lock
