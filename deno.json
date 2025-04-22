@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --watch main.ts",
-    "build": "emcc c/main.c -o public/build/main.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_is_elf,_get_entry_point,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,HEAPU8 --memoryprofiler"
+    "build": "emcc c/main.c -o public/build/main.js -O3 -sMODULARIZE -sEXPORT_ES6=1 -sENVIRONMENT=web -sEXPORTED_FUNCTIONS=_is_elf,_get_entry_point,_malloc,_free -sEXPORTED_RUNTIME_METHODS=cwrap,HEAPU8"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",

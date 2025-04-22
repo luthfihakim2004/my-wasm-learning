@@ -23,19 +23,15 @@ jobs:
       - name: Install Deno
         uses: denoland/setup-deno@v1
 
-      - name: Install Emscripten SDK
+      - name: Install and Activate Emscripten SDK
         run: |
           git clone https://github.com/emscripten-core/emsdk.git
           cd emsdk
           ./emsdk install latest
           ./emsdk activate latest
-          
-      - name: Load EMSDK environment
-        run: |
-          source emsdk/emsdk_env.sh
-          echo "EMSDK=$EMSDK" >> $GITHUB_ENV
-          echo "EMSDK_NODE=$EMSDK_NODE" >> $GITHUB_ENV
-          echo "PATH=$PATH" >> $GITHUB_ENV
+          source ./emsdk_env.sh
+          echo "EMSDK=$(pwd)" >> $GITHUB_ENV
+          echo "$(pwd)/upstream/emscripten" >> $GITHUB_PATH
 
       - name: Build
         run: deno task build
@@ -45,4 +41,4 @@ jobs:
         with:
           project: luthfihakim2004-wasm # the name of the project on Deno Deploy
           entrypoint: main.ts
-          root: .
+          root: ./public
