@@ -1,4 +1,4 @@
-import ModuleFactory from "/build/hello.js";
+import ModuleFactory from "/build/main.js";
 
 const init = async () => {
   const Module = await ModuleFactory();
@@ -11,7 +11,10 @@ const init = async () => {
 
   uploadBtn.onclick = async () => {
     const file = fileInput.files[0];
-    if (!file) return;
+    if (!file) {
+      output.textContent = "Please select a file.";
+      return;
+    }
 
     const buffer = await file.arrayBuffer();
     const len = buffer.byteLength;
