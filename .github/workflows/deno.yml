@@ -40,5 +40,5 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: luthfihakim2004-wasm # the name of the project on Deno Deploy
-          entrypoint: main.ts
+          entrypoint: ../main.ts
           root: ./
