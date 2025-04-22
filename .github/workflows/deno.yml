@@ -27,7 +27,14 @@ jobs:
         uses: lovasoa/setup-emscripten@master
         with:
           emscripten-version: 'latest'
-      
+
+      - name: Load EMSDK environment
+        run: |
+          source emsdk/emsdk_env.sh
+          echo "EMSDK=$EMSDK" >> $GITHUB_ENV
+          echo "EMSDK_NODE=$EMSDK_NODE" >> $GITHUB_ENV
+          echo "PATH=$PATH" >> $GITHUB_ENV
+
       - name: Build
         run: deno task build
 
