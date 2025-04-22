@@ -1,8 +1,7 @@
 /* public/style.css */
-
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #121212;
+  background-color: #1e1e1e; /* Darker background for better contrast */
   color: #e0e0e0;
   display: flex;
   flex-direction: column;
@@ -10,47 +9,97 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
+  padding: 20px; /* Add padding for better spacing */
 }
 
 h1 {
   color: #ffffff;
   margin-bottom: 20px;
+  font-size: 2.5rem; /* Larger font size for the title */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
 }
 
-input[type="text"] {
-  padding: 10px;
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px; /* Space between upload and output */
+}
+
+input[type="file"] {
+  padding: 12px;
   font-size: 16px;
-  background-color: #1e1e1e;
+  background-color: #2a2a2a; /* Darker input background */
   color: #ffffff;
   border: 2px solid #444;
   border-radius: 8px;
-  margin-right: 10px;
-  width: 200px;
-  transition: border-color 0.3s ease;
+  margin-bottom: 10px;
+  width: 250px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
-input[type="text"]:focus {
-  border-color: #fff;
+input[type="file"]:focus {
+  border-color: #ffffff; /* Highlight border on focus */
+  background-color: #333; /* Slightly lighter background on focus */
   outline: none;
 }
 
 button {
-  padding: 10px 16px;
+  padding: 12px 20px;
   font-size: 16px;
-  background-color: #fff;
-  color: black;
+  background-color: #4C9; /* Green */
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
 }
 
 button:hover {
-  background-color: #fffa;
+  background-color: #4CAD; /* Darker green */
+  transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
 p#output {
   margin-top: 20px;
   font-size: 18px;
   color: #ffffff;
+}
+
+.entry-point {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 1.2rem; /* Slightly larger font for entry point */
+}
+
+.section-list {
+  list-style-type: square;
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.loading {
+  color: #ffcc00; /* Yellow */
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.error {
+  color: #ff4d4d; /* Red */
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .upload-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  input[type="file"], button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
 }

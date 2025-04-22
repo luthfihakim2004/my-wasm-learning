@@ -1,52 +1,10 @@
-#include <stdint.h>
+#include "struct.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
-#define ELFCLASS32 1
-#define ELFCLASS64 2
-#define EI_NIDENT 16
-#define EI_CLASS 4
-
-typedef struct {
-  unsigned char e_ident[EI_NIDENT];
-  uint16_t e_type;
-  uint16_t e_machine;
-  uint32_t e_version;
-  uint32_t e_entry;
-  uint32_t e_phoff;
-  uint32_t e_shoff;
-  uint32_t e_flags;
-  uint16_t e_ehsize;
-  uint16_t e_phentsize;
-  uint16_t e_phnum;
-  uint16_t e_shentsize;
-  uint16_t e_shnum;
-  uint16_t e_shstrndx;
-} Elf32;
-
-typedef struct {
-  unsigned char e_ident[EI_NIDENT];
-  uint16_t e_type;
-  uint16_t e_machine;
-  uint32_t e_version;
-  uint64_t e_entry;
-  uint32_t e_phoff;
-  uint32_t e_shoff;
-  uint32_t e_flags;
-  uint16_t e_ehsize;
-  uint16_t e_phentsize;
-  uint16_t e_phnum;
-  uint16_t e_shentsize;
-  uint16_t e_shnum;
-  uint16_t e_shstrndx;
-} Elf64;
-
-char *saved_input = NULL;
+char *json_buff = NULL;
 
 EMSCRIPTEN_KEEPALIVE
 int is_elf(const uint8_t *bytes, int length) {
@@ -74,4 +32,51 @@ uint64_t get_entry_point(const uint8_t *bytes, int length) {
   }
 
   return 0;
+}
+
+EMSCRIPTEN_KEEPALIVE
+const char *list_sections(const uint8_t *bytes, int length) {
+  if (!is_elf(bytes, length)) {
+    printf("Not a valid ELF file.\n");
+    return 0;
+  }
+
+  free(json_buff);
+  json_buff = NULL;
+  size_t cap = 4096;
+  json_buff = malloc(cap);
+  strcpy(json_buff, "[");
+
+  if (bytes[EI_CLASS] == ELFCLASS32) {
+    Elf32 *ehdr = (Elf32 *)bytes;
+    Elf32_Shdr *sh_table = (Elf32_Shdr *)(bytes + ehdr->e_shoff);
+    const char *shstrtab =
+        (const char *)(bytes + sh_table[ehdr->e_shstrndx].sh_offset);
+
+    for (int i = 0; i < ehdr->e_shnum; i++) {
+      const char *name = shstrtab + sh_table[i].sh_name;
+      strcat(json_buff, "\"");
+      strcat(json_buff, name);
+      strcat(json_buff, "\"");
+      if (i != ehdr->e_shnum - 1)
+        strcat(json_buff, ",");
+    }
+  } else if (bytes[EI_CLASS] == ELFCLASS64) {
+    Elf64 *ehdr = (Elf64 *)bytes;
+    Elf64_Shdr *sh_table = (Elf64_Shdr *)(bytes + ehdr->e_shoff);
+    const char *shstrtab =
+        (const char *)(bytes + sh_table[ehdr->e_shstrndx].sh_offset);
+
+    for (int i = 0; i < ehdr->e_shnum; i++) {
+      const char *name = shstrtab + sh_table[i].sh_name;
+      strcat(json_buff, "\"");
+      strcat(json_buff, name);
+      strcat(json_buff, "\"");
+      if (i != ehdr->e_shnum - 1)
+        strcat(json_buff, ",");
+    }
+  }
+
+  strcat(json_buff, "]");
+  return json_buff;
 }
