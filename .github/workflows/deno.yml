@@ -23,11 +23,13 @@ jobs:
       - name: Install Deno
         uses: denoland/setup-deno@v1
 
-      - name: Install Emscripten
-        uses: lovasoa/setup-emscripten@master
-        with:
-          emscripten-version: 'latest'
-
+      - name: Install Emscripten SDK
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git
+          cd emsdk
+          ./emsdk install latest
+          ./emsdk activate latest
+          
       - name: Load EMSDK environment
         run: |
           source emsdk/emsdk_env.sh
