@@ -41,4 +41,5 @@ jobs:
         with:
           project: luthfihakim2004-wasm # the name of the project on Deno Deploy
           entrypoint: main.ts
+          exclude: emsdk/, .github/, c/, README.md, *.lock
           root: .
