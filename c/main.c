@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *json_buff = NULL;
-
+// for checkin magic number ".ELF" of file
 EMSCRIPTEN_KEEPALIVE
 int is_elf(const uint8_t *bytes, int length) {
   if (length < 4)
@@ -14,6 +13,7 @@ int is_elf(const uint8_t *bytes, int length) {
          bytes[3] == 'F';
 }
 
+// lookin for entry point of the file
 EMSCRIPTEN_KEEPALIVE
 uint64_t get_entry_point(const uint8_t *bytes, int length) {
   if (!is_elf(bytes, length))
@@ -34,49 +34,59 @@ uint64_t get_entry_point(const uint8_t *bytes, int length) {
   return 0;
 }
 
+// get all available section of the ELF file
 EMSCRIPTEN_KEEPALIVE
 const char *list_sections(const uint8_t *bytes, int length) {
   if (!is_elf(bytes, length)) {
     printf("Not a valid ELF file.\n");
-    return 0;
+    return NULL;
   }
 
-  free(json_buff);
-  json_buff = NULL;
+  char *json_buff = NULL;
+
+  if (json_buff)
+    free(json_buff);
   size_t cap = 4096;
   json_buff = malloc(cap);
+  if (!json_buff)
+    return NULL;
+  json_buff[0] = '\0';
   strcpy(json_buff, "[");
 
-  if (bytes[EI_CLASS] == ELFCLASS32) {
-    Elf32 *ehdr = (Elf32 *)bytes;
-    Elf32_Shdr *sh_table = (Elf32_Shdr *)(bytes + ehdr->e_shoff);
-    const char *shstrtab =
-        (const char *)(bytes + sh_table[ehdr->e_shstrndx].sh_offset);
+  int is_64 = bytes[EI_CLASS] == ELFCLASS64;
 
-    for (int i = 0; i < ehdr->e_shnum; i++) {
-      const char *name = shstrtab + sh_table[i].sh_name;
-      strcat(json_buff, "\"");
-      strcat(json_buff, name);
-      strcat(json_buff, "\"");
-      if (i != ehdr->e_shnum - 1)
-        strcat(json_buff, ",");
-    }
-  } else if (bytes[EI_CLASS] == ELFCLASS64) {
-    Elf64 *ehdr = (Elf64 *)bytes;
-    Elf64_Shdr *sh_table = (Elf64_Shdr *)(bytes + ehdr->e_shoff);
-    const char *shstrtab =
-        (const char *)(bytes + sh_table[ehdr->e_shstrndx].sh_offset);
+  void *ehdr = (void *)bytes;
+  const void *sh_table =
+      bytes + (is_64 ? ((Elf64 *)ehdr)->e_shoff : ((Elf32 *)ehdr)->e_shoff);
+  int shnum = is_64 ? ((Elf64 *)ehdr)->e_shnum : ((Elf32 *)ehdr)->e_shnum;
+  int shstrndx =
+      is_64 ? ((Elf64 *)ehdr)->e_shstrndx : ((Elf32 *)ehdr)->e_shstrndx;
 
-    for (int i = 0; i < ehdr->e_shnum; i++) {
-      const char *name = shstrtab + sh_table[i].sh_name;
-      strcat(json_buff, "\"");
-      strcat(json_buff, name);
-      strcat(json_buff, "\"");
-      if (i != ehdr->e_shnum - 1)
-        strcat(json_buff, ",");
+  size_t sh_entry_size = is_64 ? sizeof(Elf64_Shdr) : sizeof(Elf32_Shdr);
+  const char *shstrtab =
+      (const char *)(bytes +
+                     (is_64 ? ((Elf64_Shdr *)(sh_table))[shstrndx].sh_offset
+                            : ((Elf32_Shdr *)(sh_table))[shstrndx].sh_offset));
+
+  for (int i = 0; i < shnum; i++) {
+    const char *name = shstrtab + (is_64 ? ((Elf64_Shdr *)sh_table)[i].sh_name
+                                         : ((Elf32_Shdr *)sh_table)[i].sh_name);
+
+    if (strlen(json_buff) + strlen(name) + 4 >= cap) {
+      cap *= 2;
+      char *tmp = realloc(json_buff, cap);
+      if (!tmp)
+        return NULL;
+      json_buff = tmp;
     }
+
+    strncat(json_buff, "\"", cap);
+    strncat(json_buff, name, cap);
+    strncat(json_buff, "\"", cap);
+    if (i != shnum - 1)
+      strncat(json_buff, ",", cap);
   }
 
-  strcat(json_buff, "]");
+  strncat(json_buff, "]", cap);
   return json_buff;
 }
